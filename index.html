@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DentalLux Academy Block 2</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:720px;margin:24px auto;padding:0 16px;line-height:1.5}
+.card{border:1px solid #e2e8f0;border-radius:16px;padding:20px;margin:12px 0}
+button{display:block;width:100%;text-align:left;margin:8px 0;padding:12px;border-radius:12px;border:2px solid #e2e8f0;background:#fff;font:inherit;cursor:pointer}
+button:hover{border-color:#2563eb}
+.ok{background:#ecfdf5;border-color:#059669}
+.bad{background:#fef2f2;border-color:#dc2626}
+.meta{color:#64748b;font-size:13px}
+h1{font-size:22px}
+.box{background:#f8fafc;padding:12px;border-radius:12px;margin:10px 0;border-left:4px solid #2563eb}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const steps=[
+{t:'story',title:'Утро в общаге',html:'<p>Комната 214. Динара, Кара, Мира, Лейла. Пять пар сегодня.</p><div class="box"><b>Кара</b><p>Без ночных шёпотов про живот. Воздух и так тяжёлый.</p></div>',choices:[{l:'Ок, разговоры только в комнате',c:'Кара кивает.'},{l:'Обнять Динару при всех',c:'Мира: хотя бы кто-то нормальный.'}]},
+{t:'exam',title:'Сегментация · кто свой',q:'Кто «свой» сегмент для лечения/импланта?',opts:['Любой с номером','Человек с задачей под услугу и готовностью дальше осмотра','Только бесплатная чистка','Весь город'],ok:1,why:'Сегмент по задаче и готовности, не по клику.'},
+{t:'story',title:'Только про вас',html:'<div class="box"><b>Динара</b><p>Ирина звала закрыть пропуски. Я отказала.</p></div>',choices:[{l:'К Ирине одна не ходишь',c:'Динара: это нужно было услышать.'},{l:'Сами разберёмся',c:'Мира отходит.'}]},
+{t:'exam',title:'Метрики · CAC',q:'Реклама 3 000 000 + продажи 1 000 000, оплатили 80. CAC?',opts:['37500','50000','3000000','нельзя'],ok:1,why:'(3м+1м)/80=50000. CAC — цена оплатившего.'},
+{t:'exam',title:'Воронка · show-up',q:'Записались 200, дошли 110. Show-up?',opts:['55%','110%','нужен бюджет','нужны заявки'],ok:0,why:'110/200=55%. Show-up=дошли/записались.'},
+{t:'story',title:'Обед · комната 214',html:'<div class="box"><b>Динара</b><p>Щеколда. Без метрик. Руки. Тихо.</p></div>',choices:[{l:'Закрыть щеколду',c:'Она: хотя бы это ещё моё.'},{l:'Только подержать',c:'Спасибо что не врёшь.'}]},
+{t:'exam',title:'Кабинеты · цель',q:'Цель «просмотр», 12 конверсий — это?',opts:['оплаты','заявки','просмотры','звонки'],ok:2,why:'Кабинет считает цель. Цель=просмотр.'},
+{t:'exam',title:'ROMI · две цифры',q:'Касса 2м, реклама 1.5м, себест. 0.8м. Вывод?',opts:['+33% по кассе и −20% после врача — масштаб рано','оба плюс','себестоимость не нужна','одной цифры хватит'],ok:0,why:'Всегда два ROMI. Второй минус — не удваивать.'},
+{t:'story',title:'Кухня ночью',html:'<div class="box"><b>Кара</b><p>Если ко мне — скажи. К Лейле — тоже.</p></div>',choices:[{l:'К Каре',c:'Завтра снова буду язвить.'},{l:'К Лейле',c:'Только сегодня.'},{l:'К Динаре без секса',c:'Она отодвигается, чтобы было место.'},{l:'Ни к кому',c:'Мира: редко кто так держит.'}]},
+{t:'exam',title:'Сегментация · обещание',q:'Обещание под лечение?',opts:['Бесплатно всё','Разбор и план без давления','Скидка 90%','Любой текст'],ok:1,why:'Обещание = первый реальный шаг.'},
+{t:'exam',title:'Три полки',q:'Расход 1.2м, заявки 300, дошли 90, оплатили 45. Цены?',opts:['4000 / 13333 / 26667','все 4000','наоборот','средняя'],ok:0,why:'Один расход, три знаменателя.'},
+{t:'exam',title:'Кабинеты · Яндекс и Meta',q:'Яндекс 180к/24, Meta 360к/120. Цены заявок?',opts:['7500 и 3000','обе 5250','наоборот','только сумма'],ok:0,why:'Кабинеты отдельно.'},
+{t:'exam',title:'Воронка · дыра',q:'800 просмотров, 100 стартов, 12 оплат. Где первым?',opts:['CPM','Оплата: ошибки, доверие, трекинг','Охват','Подписчики'],ok:1,why:'Узкое место после старта оформления.'},
+{t:'exam',title:'ROMI · сегмент',q:'Касса 900к, себест 380к, расход 250к. Вывод?',opts:['Сегмент +270к; весь кабинет не удваивать','минус','удваивать всё','мало цифр'],ok:0,why:'Плюс сегмента ≠ масштаб всей свалки.'},
+{t:'story',title:'Тихий час',html:'<div class="box"><b>Кара</b><p>Динара в душе. 15 минут.</p></div><div class="box"><b>Мира</b><p>Мне нужно чтобы потом не делал вид что меня не было.</p></div>',choices:[{l:'Кара',c:'Она уже наверху когда открывается душ.'},{l:'Мира',c:'Не говори Каре.'},{l:'Дождаться Динару',c:'Мира: редкий.'}]},
+{t:'exam',title:'Тест Meta',q:'Цель 40$. День1: 25$ 0 заявок. День4: 130$ 0 заявок.',opts:['День1 ждать, день4 стоп','стоп в день1','удвоить на 4-й','ждать месяц'],ok:0,why:'До 1 целевой рано. После 3 без события — стоп.'},
+{t:'exam',title:'Речь директору',q:'Поиск в плюсе, мусор жрёт. Что сказать?',opts:['Удвоим','Пауза мусора, поиск оставить, масштаб после плюса','Выключить всё','Ждать квартал'],ok:1,why:'Кто платит → что глушить → бюджет.'},
+{t:'end',title:'Конец блока 2',html:'<p>Формулы можно нести в клинику. Динара всё ещё в 214-й. Академия продаёт оценки. Ты решаешь зачем приехал.</p>'}
+];
+let i=0,score=0,max=0;
+function go(){
+const s=steps[i];const a=document.getElementById('app');
+if(!s){return;}
+if(s.t==='end'){a.innerHTML=`<h1>${s.title}</h1>${s.html}<p class="meta">Верных: ${score}/${max}</p>`;return;}
+if(s.t==='story'){
+a.innerHTML=`<div class="meta">Сцена</div><h1>${s.title}</h1>${s.html}<div id="ch"></div>`;
+const ch=document.getElementById('ch');
+s.choices.forEach((c,n)=>{
+const b=document.createElement('button');b.textContent=c.l;b.onclick=()=>{ch.innerHTML=`<div class="box">${c.c}</div><button onclick="i++;go()">Дальше</button>`;};ch.appendChild(b);
+});
+} else {
+a.innerHTML=`<div class="meta">Пара</div><h1>${s.title}</h1><p><b>${s.q}</b></p><div id="ch"></div><div id="fb"></div>`;
+const ch=document.getElementById('ch');
+s.opts.forEach((t,n)=>{
+const b=document.createElement('button');b.textContent=String.fromCharCode(65+n)+'. '+t;
+b.onclick=()=>{
+max++;if(n===s.ok)score++;
+[...ch.children].forEach((el,j)=>{el.disabled=true;if(j===s.ok)el.className='ok';else if(j===n)el.className='bad';});
+document.getElementById('fb').innerHTML=`<div class="box"><b>${n===s.ok?'Верно':'Мимо'}</b><p>${s.why}</p></div><button onclick="i++;go()">Дальше</button>`;
+};ch.appendChild(b);
+});
+}
+}
+go();
+</script>
+</body>
+</html>
